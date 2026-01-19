@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Expense AI — Smart Finance Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+    <!-- LOGIN PAGE  -->
+    <div id="login-page" class="page">
+        <div class="login-box">
+            <h2>Expense AI</h2>
+            <p>Smart Finance Dashboard</p>
+
+            <input id="login-username" placeholder="Username" />
+            <input id="login-password" type="password" placeholder="Password" />
+            <button onclick="login()">Login</button>
+
+            <p id="login-error"></p>
+        </div>
+    </div>
+
+    <!--  DASHBOARD PAGE -->
+    <div id="dashboard-page" class="page hidden">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Expense AI</h2>
+
+            <button onclick="showPage('dashboard')" class="active">
+                Dashboard
+            </button>
+
+            <button onclick="showPage('transactions')">
+                Transactions
+            </button>
+
+            <button onclick="logout()">
+                Sign Out
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Dashboard</h1>
+            <h3>Overview of your financial health</h3>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Total Spending</h3>
+                    <p id="total-spend">₹0</p>
+                </div>
+
+                <div class="card">
+                    <h3>AI Spending Insight</h3>
+                    <p id="ai-advice">Loading...</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!--  TRANSACTIONS PAGE -->
+    <div id="transactions-page" class="page hidden">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Expense AI</h2>
+
+            <button onclick="showPage('dashboard')">
+                Dashboard
+            </button>
+
+            <button onclick="showPage('transactions')" class="active">
+                Transactions
+            </button>
+
+            <button onclick="logout()">
+                Sign Out
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Transactions</h1>
+            <h3>Manage your expenses and history</h3>
+
+            <!-- Add Expense -->
+            <div class="add-expense">
+                <input id="exp-title" placeholder="Expense title" />
+                <input id="exp-amount" type="number" placeholder="Amount" />
+                <button onclick="addExpense()">Add Expense</button>
+            </div>
+
+            <!-- Table -->
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody id="expense-table"></tbody>
+            </table>
+
+        </main>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background: #0b0b0f;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* Utilities */
+.hidden {
+    display: none;
+}
+
+/* Layout */
+.page {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ===================== LOGIN PAGE ===================== */
+
+#login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-box {
+    background: linear-gradient(145deg, #12121a, #0f0f16);
+    padding: 40px;
+    width: 360px;
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(138, 92, 246, 0.15);
+    text-align: center;
+}
+
+.login-box h2 {
+    font-size: 26px;
+    margin-bottom: 8px;
+    color: #a78bfa;
+}
+
+.login-box p {
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #b3b3c5;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    background: #161622;
+    border: 1px solid #26263a;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-box button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#login-error {
+    margin-top: 10px;
+    color: #ff4d4d;
+    font-size: 13px;
+}
+
+/* ===================== SIDEBAR ===================== */
+
+.sidebar {
+    width: 240px;
+    background: linear-gradient(180deg, #0f0f18, #0b0b12);
+    border-right: 1px solid #1e1e2f;
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    font-size: 22px;
+    color: #a78bfa;
+    margin-bottom: 40px;
+}
+
+.sidebar button {
+    background: transparent;
+    border: none;
+    color: #c7c7e2;
+    text-align: left;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.sidebar button:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #fff;
+}
+
+.sidebar button.active {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: white;
+}
+
+/* ===================== CONTENT ===================== */
+
+.content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.content h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.content h3 {
+    font-size: 16px;
+    color: #b5b5cc;
+    margin-bottom: 20px;
+}
+
+/* ===================== CARDS ===================== */
+
+.cards {
+    display: flex;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.card {
+    background: linear-gradient(145deg, #14141f, #101019);
+    padding: 25px;
+    border-radius: 16px;
+    width: 300px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    border: 1px solid #1f1f30;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #8b5cf6;
+}
+
+.card h3 {
+    font-size: 15px;
+    color: #bdbde0;
+    margin-bottom: 12px;
+}
+
+.card p {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* ===================== TRANSACTIONS ===================== */
+
+.add-expense {
+    margin-bottom: 25px;
+}
+
+.add-expense input {
+    padding: 12px;
+    margin-right: 10px;
+    background: #161622;
+    border: 1px solid #26263a;
+    color: white;
+    border-radius: 8px;
+}
+
+.add-expense button {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ===================== TABLE ===================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: #101018;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1f1f30;
+}
+
+thead {
+    background: #161622;
+}
+
+th, td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #1f1f30;
+}
+
+th {
+    color: #bdbde0;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+td {
+    font-size: 15px;
+}
+
+tr:hover {
+    background: rgba(139, 92, 246, 0.08);
+}
+
+/* ===================== SCROLLBAR ===================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b5cf6;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0b0f;
+}
