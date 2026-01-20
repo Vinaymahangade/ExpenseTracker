@@ -23,4 +23,6 @@ public class MonthlyAiController {
         String username = authentication.getName();
         return analyticsService.generateMonthlyReport(username);
     }
+    
+    
 }

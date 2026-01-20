@@ -38,6 +38,16 @@ public class Expense {
         this.user = user;
     }
 
+    /* 🔥 IMPORTANT FIX — AUTO SET DATE */
+    @PrePersist
+    public void prePersist() {
+        if (this.expenseDate == null) {
+            this.expenseDate = LocalDate.now();
+        }
+    }
+
+    // ================= GETTERS & SETTERS =================
+
     public Long getId() {
         return id;
     }

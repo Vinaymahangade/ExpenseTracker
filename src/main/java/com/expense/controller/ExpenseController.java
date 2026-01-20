@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -20,25 +21,43 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<Expense> addExpense(@RequestBody Expense expense,
-                                              Authentication authentication) {
+    public ResponseEntity<Expense> addExpense(
+            @RequestBody Expense expense,
+            Authentication authentication) {
 
-        String username = authentication.getName();
-        return expenseService.addExpense(expense, username);
+        return expenseService.addExpense(
+                expense,
+                authentication.getName()
+        );
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getExpenses(Authentication authentication) {
+    public ResponseEntity<List<Expense>> getExpenses(
+            Authentication authentication) {
 
-        String username = authentication.getName();
-        return expenseService.getExpenses(username);
+        return expenseService.getExpenses(
+                authentication.getName()
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteExpense(@PathVariable Long id,
-                                                Authentication authentication) {
+    public ResponseEntity<String> deleteExpense(
+            @PathVariable Long id,
+            Authentication authentication) {
 
-        String username = authentication.getName();
-        return expenseService.deleteExpense(id, username);
+        return expenseService.deleteExpense(
+                id,
+                authentication.getName()
+        );
+    }
+
+    // 🔥 MONTHLY ANALYTICS
+    @GetMapping("/analytics/monthly")
+    public ResponseEntity<Map<String, Double>> monthlyAnalytics(
+            Authentication authentication) {
+
+        return expenseService.getMonthlyAnalytics(
+                authentication.getName()
+        );
     }
 }

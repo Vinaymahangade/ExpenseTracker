@@ -1,158 +1,265 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_BASE = "http://localhost:8080";
+const API = "http://localhost:8080";
+const MONTHLY_LIMIT = 10000;
 
-function App() {
+export default function App() {
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [report, setReport] = useState(null);
-  const [message, setMessage] = useState("");
+
+  const [expenses, setExpenses] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("Food");
+  const [note, setNote] = useState("");
+  const [paymentMode, setPaymentMode] = useState("UPI");
+
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState("");
 
-  // 🔁 Check token on refresh
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) setIsLoggedIn(true);
-  }, []);
-
-  // 🔐 LOGIN
+  /* ================= LOGIN ================= */
   const login = async () => {
-    setMessage("");
-    if (!username || !password) {
-      setMessage("Username & password required");
-      return;
-    }
-
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-
       if (!res.ok) throw new Error();
-
       const data = await res.json();
       localStorage.setItem("token", data.token);
-
-      setIsLoggedIn(true);
-      setMessage("Login successful ✅");
+      setToken(data.token);
     } catch {
-      setMessage("Login failed ❌");
+      setError("Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🚪 LOGOUT
+  /* ================= LOAD EXPENSES ================= */
+  const loadExpenses = async () => {
+    const res = await fetch(`${API}/api/expenses`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setExpenses(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => {
+    if (token) loadExpenses();
+  }, [token]);
+
+  /* ================= ADD EXPENSE ================= */
+  const addExpense = async () => {
+    if (!amount || amount <= 0) return;
+
+    const expense = {
+      amount: Number(amount),
+      category,
+      note,
+      paymentMode,
+      date: new Date().toISOString().slice(0, 10),
+    };
+
+    const res = await fetch(`${API}/api/expenses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(expense),
+    });
+
+    const saved = await res.json();
+    setExpenses((prev) => [saved, ...prev]);
+    setAmount("");
+    setNote("");
+  };
+
   const logout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setReport(null);
-    setUsername("");
-    setPassword("");
-    setMessage("");
+    localStorage.clear();
+    setToken(null);
+    setExpenses([]);
   };
 
-  // 📊 LOAD REPORT
-  const loadReport = async () => {
-    setMessage("");
-    try {
-      setLoading(true);
+  /* ================= LOGIN UI ================= */
+  if (!token) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <h1>Expense AI</h1>
+          <p>Home Expense Report</p>
 
-      const token = localStorage.getItem("token");
+          <input
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-      const res = await fetch(`${API_BASE}/api/analytics/monthly`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      if (!res.ok) throw new Error();
+          <button onClick={login}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
 
-      const data = await res.json();
-      setReport(data);
-    } catch {
-      setMessage("Failed to load report ❌");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="page">
-      <div className="card">
-        <h2>AI Expense Tracker</h2>
-
-        {!isLoggedIn && (
-          <>
-            <input
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button onClick={login} disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </>
-        )}
-
-        {isLoggedIn && (
-          <>
-            <div className="actions">
-              <button onClick={loadReport} disabled={loading}>
-                {loading ? "Loading..." : "📊 Load Monthly Report"}
-              </button>
-
-              <button className="logout" onClick={logout}>
-                🚪 Logout
-              </button>
-            </div>
-
-            {report ? (
-              <div className="report">
-                <div className="stat">
-                  <span>Total Spent</span>
-                  <h3>₹{report.totalSpent}</h3>
-                </div>
-
-                <div className="stat">
-                  <span>Savings</span>
-                  <h3 className={report.savings < 0 ? "danger" : "success"}>
-                    ₹{report.savings}
-                  </h3>
-                </div>
-
-                <div className="advice">
-                  <h4>AI Advice</h4>
-                  <p>{report.advice}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="empty">
-                <p>No expenses recorded yet 🚀</p>
-                <p>Start tracking to see insights.</p>
-              </div>
-            )}
-          </>
-        )}
-
-        {message && <p className="message">{message}</p>}
+          {error && <p className="error">{error}</p>}
+        </div>
       </div>
+    );
+  }
+
+  /* ================= ANALYTICS ================= */
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
+  const remaining = Math.max(MONTHLY_LIMIT - totalSpent, 0);
+  const percent = Math.min((totalSpent / MONTHLY_LIMIT) * 100, 100);
+
+  const categoryMap = {};
+  expenses.forEach((e) => {
+    categoryMap[e.category] = (categoryMap[e.category] || 0) + e.amount;
+  });
+
+  const topCategory =
+    Object.entries(categoryMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+  const highestExpense =
+    expenses.length > 0 ? Math.max(...expenses.map((e) => e.amount)) : 0;
+
+  /* ================= DASHBOARD ================= */
+  return (
+    <div className="dashboard">
+      <aside className="sidebar">
+        <h2>Expense AI</h2>
+
+        <div className="user-box">
+          <div className="avatar">V</div>
+          <div>
+            <strong>Vinay Mahangade</strong>
+            <div>User</div>
+          </div>
+        </div>
+
+        <button className="logout-btn" onClick={logout}>
+          Logout
+        </button>
+      </aside>
+
+      <main className="content">
+        <h1>Dashboard</h1>
+        <p className="subtitle">Home Expense Dashboard</p>
+
+        {/* SUMMARY */}
+        <div className="cards">
+          <div className="card">
+            <h4>Total Spent</h4>
+            <p>₹{totalSpent}</p>
+          </div>
+          <div className="card">
+            <h4>Remaining</h4>
+            <p>₹{remaining}</p>
+          </div>
+          <div className="card">
+            <h4>Top Category</h4>
+            <p>{topCategory}</p>
+          </div>
+          <div className="card">
+            <h4>Highest Expense</h4>
+            <p>₹{highestExpense}</p>
+          </div>
+        </div>
+
+        {/* LIMIT */}
+        <div className="limit-box">
+          <div className="limit-head">
+            <span>Monthly Limit ₹10,000</span>
+            <span>{percent.toFixed(0)}%</span>
+          </div>
+          <div className="limit-bar">
+            <div
+              className={`limit-fill ${
+                percent > 90 ? "red" : percent > 70 ? "yellow" : ""
+              }`}
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* ADD */}
+        <div className="add-row">
+          <input
+            type="number"
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option>Food</option>
+            <option>Rent</option>
+            <option>Travel</option>
+            <option>Shopping</option>
+            <option>Bills</option>
+            <option>Other</option>
+          </select>
+
+          <select
+            value={paymentMode}
+            onChange={(e) => setPaymentMode(e.target.value)}
+          >
+            <option>UPI</option>
+            <option>Cash</option>
+            <option>Card</option>
+            <option>Bank</option>
+          </select>
+
+          <input
+            placeholder="Note (optional)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+
+          <button onClick={addExpense}>Add</button>
+        </div>
+
+        {/* ANALYTICS */}
+        <div className="analytics">
+          <h3>Category Analytics</h3>
+          {Object.entries(categoryMap).map(([cat, val]) => (
+            <div className="bar" key={cat}>
+              <span>{cat}</span>
+              <div className="progress">
+                <div
+                  className="fill"
+                  style={{
+                    width: `${(val / totalSpent) * 100 || 0}%`,
+                  }}
+                />
+              </div>
+              <span>₹{val}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* RECENT */}
+        <div className="list">
+          <h3>Recent Expenses</h3>
+          {expenses.map((e) => (
+            <div className="row" key={e.id}>
+              <span>{e.date}</span>
+              <span>{e.category}</span>
+              <span>{e.paymentMode}</span>
+              <strong>₹{e.amount}</strong>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }
-
-export default App;

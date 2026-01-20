@@ -9,7 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -31,14 +34,17 @@ public class ExpenseServiceImpl implements ExpenseService {
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             expense.setUser(user);
-            Expense savedExpense = expenseRepository.save(expense);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedExpense);
+            // 🔥 VERY IMPORTANT (SQL ERROR FIX)
+            if (expense.getExpenseDate() == null) {
+                expense.setExpenseDate(LocalDate.now());
+            }
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            Expense saved = expenseRepository.save(expense);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -49,12 +55,8 @@ public class ExpenseServiceImpl implements ExpenseService {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            List<Expense> expenses = expenseRepository.findByUser(user);
+            return ResponseEntity.ok(expenseRepository.findByUser(user));
 
-            return ResponseEntity.ok(expenses);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -72,18 +74,38 @@ public class ExpenseServiceImpl implements ExpenseService {
 
             if (!expense.getUser().getId().equals(user.getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Unauthorized to delete this expense");
+                        .body("Unauthorized");
             }
 
             expenseRepository.delete(expense);
-
             return ResponseEntity.ok("Expense deleted successfully");
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to delete expense");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
         }
+    }
+
+    // 🔥 MONTHLY ANALYTICS
+    @Override
+    public ResponseEntity<Map<String, Double>> getMonthlyAnalytics(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        LocalDate now = LocalDate.now();
+
+        List<Object[]> data = expenseRepository.categorySummary(
+                user.getId(),
+                now.getMonthValue(),
+                now.getYear()
+        );
+
+        Map<String, Double> result = new HashMap<>();
+        for (Object[] row : data) {
+            result.put((String) row[0], (Double) row[1]);
+        }
+
+        return ResponseEntity.ok(result);
     }
 }
