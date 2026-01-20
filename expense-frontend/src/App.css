@@ -199,3 +199,38 @@ body {
   border-radius: 10px;
   background: #020617;
 }
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.filters input,
+.filters select {
+  padding: 10px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  color: white;
+  border-radius: 10px;
+}
+
+.filters button {
+  background: #2563eb;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+}
